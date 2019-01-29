@@ -6,10 +6,11 @@ Date: Winter 2019
 */
 /*property
     books, forEach, fullName, getElementById, gridName, hash, id, init,
-    innerHTML, length, log, maxBookId, minBookId, onHashChanged, onerror,
-    onload, open, parse, push, responseText, send, slice, split, status,
-    substring
+    innerHTML, length, log, maxBookId, minBookId, numChapters, onHashChanged,
+    onerror, onload, open, parentBookId, parse, push, responseText, send, slice,
+    split, status, substring
 */
+
 
 
 /*global console*/
@@ -34,11 +35,12 @@ const Scriptures = (function () {
     */
     let ajax;
     let cacheBooks;
+    let bookChapterValid;
     let init;
     let onHashChanged;
     let navigateHome;
     let navigateBook;
-    let navigateBookChapter;
+    let navigateChapter;
 
     /*
     * PRIVATE METHODS
@@ -64,6 +66,20 @@ const Scriptures = (function () {
 
         request.onerror = failureCallback;
         request.send();
+    };
+
+    bookChapterValid = function (bookId, chapter) {
+        let book = books[bookId];
+
+        if (book === undefined || chapter < 0 || chapter > book.numChapters) {
+            return false;
+        }
+
+        if (chapter === 0 && book.numChapters > 0) {
+            return false;
+        }
+
+        return true;
     };
 
     cacheBooks = function (callback) {
@@ -129,20 +145,21 @@ const Scriptures = (function () {
         navContents += "<br /><br /></div>";
 
         document.getElementById("scriptures").innerHTML = navContents;
-        /*
-        document.getElementById("scriptures").innerHTML =
-                "<div>The Old Testament</div><div>The New Testament</div>" +
-                "<div>The Book of Mormon</div><div>Doctrine and Covenants</div>" +
-                "<div>The Pearl of Great Price</div>" + volumeId;
-        */
     };
 
     navigateBook = function (bookId) {
-        console.log("book");
+        document.getElementById("scriptures").innerHTML = "<div>" + bookId + "</div>";
     };
 
-    navigateBookChapter = function (bookId, chapter) {
-        console.log("book chapter");
+    navigateChapter = function (bookId, chapter) {
+        if (bookId !== undefined) {
+            let book = books[bookId];
+            let volume = volumes[book.parentBookId - 1];
+
+            // ajax(
+
+            document.getElementById("scriptures").innerHTML = "<div>Chapter " + chapter + "</div>";
+        }
     };
 
     onHashChanged = function () {
@@ -162,20 +179,25 @@ const Scriptures = (function () {
             } else {
                 navigateHome(volumeId);
             }
-        } else if (ids.length === 2) {
+        } else if (ids.length >= 2) {
             let bookId = Number(ids[1]);
 
             if (books[bookId] === undefined) {
                 navigateHome();
             } else {
-                navigateBook(bookId);
+                if (ids.length === 2) {
+                    navigateBook(bookId);
+                } else {
+                    let chapter = Number(ids[2]);
+
+                    if (bookChapterValid(bookId, chapter)) {
+                        navigateChapter(bookId, chapter);
+                    } else {
+                        navigateHome();
+                    }
+                }
             }
-        } else {
-            let chapterId = Number(ids[2]);
-            navigateBookChapter();
         }
-
-
     };
 
     /*
