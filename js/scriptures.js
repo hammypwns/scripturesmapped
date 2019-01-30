@@ -150,7 +150,6 @@ const Scriptures = (function () {
 
             if (volumesLoaded) {
                 cacheBooks(callback);
-                console.log(books);
             }
         });
 
@@ -160,7 +159,6 @@ const Scriptures = (function () {
 
             if (booksLoaded) {
                 cacheBooks(callback);
-                console.log(volumes);
             }
         });
     };
@@ -171,8 +169,11 @@ const Scriptures = (function () {
 
     navigateChapter = function (bookId, chapter) {
         if (bookId !== undefined) {
-            let book = books[bookId];
-            let volume = volumes[book.parentBookId - 1];
+            //let book = books[bookId];
+            //let volume = volumes[book.parentBookId - 1];
+            //used for breadcrumbs, but not necessary
+
+            console.log(nextChapter(bookId, chapter));
 
             ajax(encodedScriptureUrlParameters(bookId, chapter),
                 getScriptureCallback,
@@ -204,6 +205,32 @@ const Scriptures = (function () {
         navContents += "<br /><br /></div>";
 
         document.getElementById("scriptures").innerHTML = navContents;
+    };
+
+    nextChapter = function (bookId, chapter) {
+        let book = books[bookId];
+
+        if (book !== undefined) {
+            if (chapter < book.numChapters) {
+                return [bookId, chapter + 1, titleForBookChapter(book, chapter + 1)];
+            }
+
+            let nextBook = books[bookId + 1];
+
+            if (nextBook !== undefined) {
+                let nextChapterValue = 0;
+
+                if (nextBook.numChapters > 0) {
+                    nextChapterValue = 1;
+                }
+
+                return [
+                    nextBook.id,
+                    nextChapterValue,
+                    titleForBookChapter(nextBook, nextChapterValue)
+                ];
+            }
+        }
     };
 
     onHashChanged = function () {
@@ -243,6 +270,20 @@ const Scriptures = (function () {
             }
         }
     };
+
+    previousChapter = function (bookId, chapter) {
+
+    };
+
+    titleForBookChapter = function (book, chapter) {
+        if (chapter > 0) {
+            return book.tocName + " " + chapter;
+        }
+
+        return book.tocName;
+    };
+
+
 
     /*
     * PUBLIC API
