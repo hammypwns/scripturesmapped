@@ -18,11 +18,28 @@ Date: Winter 2019
     browser: true
     long: true */
 
+/*
+document.querySelectorAll("a[onclick^=\"showLocation(\"]").forEach(function (element) {	let matches = /\((.*),'(.*)',(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),'(.*)'\)/.exec(element.getAttribute("onclick"));
+console.log(element,matches);
+});
+*/
+
+/*
+var marker = new google.maps.Marker({
+          position: {lat: -25.363, lng: 131.044},
+          map: map,
+          title: 'Hello World!'
+        });
+
+marker.setMap(null);
+*/
+
 const Scriptures = (function () {
 
     /*
     * CONSTANTS
     */
+   const LAT_LON_PARSER = /\((.*),'(.*)',(.*),(.*),(.*),(.*),(.*),(.*),(.*),(.*),'(.*)'\)/;
    const SCRIPTURES_URL = "https://scriptures.byu.edu/mapscrip/mapgetscrip.php";
 
     /*
