@@ -32,23 +32,25 @@
       </div>
 
       <script type="text/javascript">
-          function ready(eventHandler) {
-              "use strict";
+            function ready(eventHandler) {
+            "use strict";
 
 
-              if (document.attachEvent
-                    ? document.readyState === "complete"
-                    : document.readyState !== "loading") {
-                  eventHandler();
-                    } else {
+            if (document.attachEvent
+                  ? document.readyState === "complete"
+                  : document.readyState !== "loading") {
+                eventHandler();
+                  } else {
                 document.addEventListener("DOMContentLoaded", eventHandler);
                     }
             }
 
-          ready(function () {
-              Scriptures.init(function () {console.log("Initialized"); });
-              window.addEventListener("hashchange", Scriptures.onHashChanged);
-          })
+        ready(function () {
+                Scriptures.init(function () {
+                    window.addEventListener("hashchange", Scriptures.onHashChanged);
+                    Scriptures.onHashChanged();
+                });
+        });
         </script>
 
     </body>

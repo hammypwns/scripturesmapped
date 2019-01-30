@@ -19,10 +19,11 @@ Date: Winter 2019
     long: true */
 
 const Scriptures = (function () {
-    "use strict";
+
     /*
     * CONSTANTS
     */
+   const SCRIPTURES_URL = "https://scriptures.byu.edu/mapscrip/mapgetscrip.php";
 
     /*
     * PRIVATE VARIABLES
@@ -34,25 +35,37 @@ const Scriptures = (function () {
     * PRIVATE METHOD DECLARATIONS
     */
     let ajax;
-    let cacheBooks;
     let bookChapterValid;
+    let cacheBooks;
+    let encodedScriptureUrlParameters;
+    let getScriptureCallback;
+    let getScriptureFailed;
     let init;
-    let onHashChanged;
-    let navigateHome;
     let navigateBook;
     let navigateChapter;
+    let navigateHome;
+    let nextChapter;
+    let onHashChanged;
+    let previousChapter;
+    let titleForBookChapter;
 
     /*
     * PRIVATE METHODS
     */
-    ajax = function (url, successCallback, failureCallback) {
+    ajax = function (url, successCallback, failureCallback, skipParse) {
         let request = new XMLHttpRequest();
 
         request.open("GET", url, true);
 
         request.onload = function () {
             if (request.status >= 200 && request.status < 400) {
-                let data = JSON.parse(request.responseText);
+                let data;
+
+                if (skipParse) {
+                    data = request.responseText;
+                } else {
+                    data = JSON.parse(request.responseText);
+                }
 
                 if (typeof successCallback === "function") {
                     successCallback(data);
@@ -100,6 +113,33 @@ const Scriptures = (function () {
         }
     };
 
+    encodedScriptureUrlParameters = function (bookId, chapter, verses, isJst) {
+        if (bookId !== undefined && chapter !== undefined) {
+            let options = "";
+
+            if (verses !== undefined) {
+                options += verses;
+            }
+
+            if (isJst !== undefined && isJst) {
+                options += "&jst=JST";
+            }
+
+            return SCRIPTURES_URL + "?book=" + bookId + "&chap=" + chapter +
+                    "&verses=" + options;
+        }
+    };
+
+    getScriptureCallback = function (chapterHtml) {
+        document.getElementById("scriptures").innerHTML = chapterHtml;
+
+        // NEEDS WORK: SET UP THE MAP MARKERS
+    };
+
+    getScriptureFailed = function () {
+        console.log("Warning: unable to receive scripture content from server.");
+    };
+
     init = function (callback) {
         let booksLoaded = false;
         let volumesLoaded = false;
@@ -125,6 +165,25 @@ const Scriptures = (function () {
         });
     };
 
+    navigateBook = function (bookId) {
+        document.getElementById("scriptures").innerHTML = "<div>" + bookId + "</div>";
+    };
+
+    navigateChapter = function (bookId, chapter) {
+        if (bookId !== undefined) {
+            let book = books[bookId];
+            let volume = volumes[book.parentBookId - 1];
+
+            ajax(encodedScriptureUrlParameters(bookId, chapter),
+                getScriptureCallback,
+                getScriptureFailed,
+                true);
+
+            //old dummy code below:
+            //document.getElementById("scriptures").innerHTML = "<div>Chapter " + chapter + "</div>";
+        }
+    };
+
     navigateHome = function (volumeId) {
         let navContents = "<div id=\"scriptnav\">";
 
@@ -145,21 +204,6 @@ const Scriptures = (function () {
         navContents += "<br /><br /></div>";
 
         document.getElementById("scriptures").innerHTML = navContents;
-    };
-
-    navigateBook = function (bookId) {
-        document.getElementById("scriptures").innerHTML = "<div>" + bookId + "</div>";
-    };
-
-    navigateChapter = function (bookId, chapter) {
-        if (bookId !== undefined) {
-            let book = books[bookId];
-            let volume = volumes[book.parentBookId - 1];
-
-            // ajax(
-
-            document.getElementById("scriptures").innerHTML = "<div>Chapter " + chapter + "</div>";
-        }
     };
 
     onHashChanged = function () {
