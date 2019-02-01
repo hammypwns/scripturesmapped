@@ -26,6 +26,7 @@ const Scriptures = (function () {
     * CONSTANTS
     */
     const BOTTOM_PADDING = "<br /><br />";
+    const BUTTONS = "<button id=\"prev_btn\" onclick=\"previousChapter()\">Prev</button><button id=\"next_btn\" onclick=\"nextChapter()\">Next</button>";
     const CLASS_BOOKS = "books";
     const CLASS_VOLUME = "volume";
     const DIV_BREADCRUMBS = "crumbs";
@@ -356,8 +357,46 @@ const Scriptures = (function () {
             volume = volumeForId(book.parentBookId);
         }
 
-        document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({content: bookId});
-        document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volume, book);
+
+        //
+        //$('#scriptures').hide();
+        if (bookId !== undefined) {
+            let book = books[bookId];
+            let volume = volumes[book.parentBookId - 1];
+
+            console.log(book);
+
+            if (book.numChapters === 0) {
+                navigateChapter(bookId, 0);
+
+            } else if (book.numChapters === 1) {
+                navigateChapter(bookId, 1);
+
+            } else {
+                let gridContent = `<div class = ${CLASS_VOLUME}><${TAG_HEADER5}>${book.fullName}</${TAG_HEADER5}></div><div class = ${CLASS_BOOKS}>`;
+                let currentChapter;
+
+                for(currentChapter = 1; currentChapter <= book.numChapters; currentChapter++ ) {
+                    gridContent += htmlLink({
+                        classKey: "btn chapter",
+                        id: currentChapter,
+                        href: `#${volume.id}:${book.id}:${currentChapter}`,
+                        content: `${currentChapter}`
+                    });
+                };
+
+                gridContent += `</div>`;
+
+                document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
+                    id: DIV_SCRIPTURES_NAVIGATOR,
+                    content: gridContent
+                });
+
+                document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volume, book);
+
+                document.getElementById("navButtons").innerHTML = "";
+            }
+        }
         /*
 
         NEEDS WORK: generate HTML that looks like this (to use Liddle's styles.css):
@@ -394,7 +433,26 @@ const Scriptures = (function () {
 
             console.log(nextChapter(bookId, chapter));
 
-            ajax(encodedScriptureUrlParameters(bookId, chapter),
+
+            // THIS WILL DO THE PREV AND NEXT BUTTONS
+
+
+            document.getElementById("navButtons").innerHTML = BUTTONS;
+
+            document.getElementById("next_btn").onClick = function() {
+                console.log("next button pressed")
+                let next = nextChapter(bookId, chapter);
+                Scriptures.changeHash(next[0], next[1], next[2]);
+            };
+
+            document.getElementById("prev_btn").onClick = function() {
+                console.log("prev button pressed")
+                let prev = previousChapter(bookId, chapter);
+                Scriptures.changeHash(prev[0], prev[1], prev[2]);
+            };
+
+
+            let contents = ajax(encodedScriptureUrlParameters(bookId, chapter),
                     getScriptureCallback,
                     getScriptureFailed,
                     true);
@@ -434,6 +492,8 @@ const Scriptures = (function () {
         });
 
         document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volumeForId(volumeId));
+
+        document.getElementById("navButtons").innerHTML = "";
     };
 
 

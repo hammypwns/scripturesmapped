@@ -76,7 +76,7 @@ div.subtitle {
     padding: .5em;
 }
 
-#scriptures {
+#scripturesAndNav {
     min-width: 220px;
     max-width: 440px;
     flex: 1 1 30%;
@@ -218,7 +218,7 @@ div.navheading {
     justify-content: center;
 }
 
-#scriptures ul.versesblock {
+#scripturesAndNav ul.versesblock {
     margin: 0;
     line-height: auto;
     list-style: none;
