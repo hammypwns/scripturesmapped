@@ -27,7 +27,7 @@ const Scriptures = (function () {
     * CONSTANTS
     */
     const BOTTOM_PADDING = "<br /><br />";
-    const BUTTONS = "<button id=\"prev_btn\" onclick=\"previousChapter()\">Prev</button><button id=\"next_btn\" onclick=\"nextChapter()\">Next</button>";
+    const BUTTONS = "<button id=\"prev_btn\">Prev</button><button id=\"next_btn\">Next</button>";
     const CLASS_BOOKS = "books";
     const CLASS_VOLUME = "volume";
     const DIV_BREADCRUMBS = "crumbs";
@@ -422,7 +422,7 @@ const Scriptures = (function () {
             requestedBreadcrumbs = breadcrumbs(volume, book, chapter);
             //used for breadcrumbs, but not necessary
 
-            console.log(nextChapter(bookId, chapter));
+            //console.log(nextChapter(bookId, chapter));
 
 
             // THIS WILL DO THE PREV AND NEXT BUTTONS
@@ -430,17 +430,29 @@ const Scriptures = (function () {
 
             document.getElementById("navButtons").innerHTML = BUTTONS;
 
-            document.getElementById("next_btn").onClick = function () {
-                console.log("next button pressed");
+            document.getElementById("next_btn").addEventListener("click", function () {
+                console.log(bookId, chapter);
                 let next = nextChapter(bookId, chapter);
-                Scriptures.changeHash(next[0], next[1], next[2]);
-            };
+                console.log(next);
+                if (next !== undefined) {
+                    changeHash(next[0], next[1], next[2]);
+                } else {
+                    changeHash(undefined);
+                    navigateHome();
+                }
+            });
 
-            document.getElementById("prev_btn").onClick = function () {
-                console.log("prev button pressed");
+            document.getElementById("prev_btn").addEventListener("click", function () {
+                console.log(bookId, chapter);
                 let prev = previousChapter(bookId, chapter);
-                Scriptures.changeHash(prev[0], prev[1], prev[2]);
-            };
+                console.log(prev);
+                if (prev !== undefined) {
+                    changeHash(prev[0], prev[1], prev[2]);
+                } else {
+                    changeHash(undefined);
+                    navigateHome();
+                }
+            });
 
 
             ajax(encodedScriptureUrlParameters(bookId, chapter),
@@ -494,22 +506,28 @@ const Scriptures = (function () {
 
         if (book !== undefined) {
             if (chapter < book.numChapters) {
-                return [bookId, chapter + 1, titleForBookChapter(book, chapter + 1)];
+                return [
+                    volume.id,
+                    book.id,
+                    chapter + 1
+                ];
+                //return [bookId, chapter + 1, titleForBookChapter(book, chapter + 1)];
             }
 
             let nextBook = books[bookId + 1];
 
             if (nextBook !== undefined) {
                 let nextChapterValue = 0;
+                let newVolume = volumes[nextBook.parentBookId - 1];
 
                 if (nextBook.numChapters > 0) {
                     nextChapterValue = 1;
                 }
 
                 return [
-                    Number[volume.id],
-                    Number[nextBook.id],
-                    Number[nextChapterValue] //,
+                    newVolume.id,
+                    nextBook.id,
+                    nextChapterValue //,
                     //titleForBookChapter(nextBook, nextChapterValue)
                 ];
             }
@@ -555,7 +573,35 @@ const Scriptures = (function () {
     };
 
     previousChapter = function (bookId, chapter) {
-        // NEEDS WORK
+        let book = books[bookId];
+        let volume = volumes[book.parentBookId - 1];
+
+        if (book !== undefined) {
+            if (chapter > 1) {
+                return [
+                    volume.id,
+                    book.id,
+                    chapter - 1
+                ];
+                //return [bookId, chapter + 1, titleForBookChapter(book, chapter + 1)];
+            }
+            let nextBook = books[bookId - 1];
+
+            if (nextBook !== undefined) {
+                let nextChapterValue = 0;
+                let newVolume = volumes[nextBook.parentBookId - 1];
+
+                if (nextBook.numChapters > 0) {
+                    nextChapterValue = nextBook.numChapters;
+                }
+                return [
+                    newVolume.id,
+                    nextBook.id,
+                    nextChapterValue //,
+                    //titleForBookChapter(nextBook, nextChapterValue)
+                ];
+            }
+        }
     };
 
     setupMarkers = function () {
@@ -630,9 +676,6 @@ const Scriptures = (function () {
     return {
         changeHash: changeHash,
         init: init,
-        nextChapter (bookId, chapter) {
-            nextChapter(bookId, chapter);
-        },
         onHashChanged: onHashChanged
     };
 })();
