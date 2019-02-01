@@ -6,12 +6,13 @@ Date: Winter 2019
 */
 
 /*property
-    Animation, DROP, Marker, animation, books, classKey, clearTimeout, content,
-    exec, forEach, fullName, getAttribute, getElementById, google, gridName,
-    hash, href, id, init, innerHTML, lat, length, lng, log, map, maps,
-    maxBookId, minBookId, numChapters, onerror, onHashChanged, onload, open,
-    parse, position, push, querySelectorAll, responseText, send, setMap,
-    setTimeout, slice, split, status, substring, title, tocName,
+    Animation, DROP, Marker, animation, books, changeHash, classKey,
+    clearTimeout, content, exec, forEach, fullName, getAttribute,
+    getElementById, google, gridName, hash, href, id, init, innerHTML, lat,
+    length, lng, log, map, maps, maxBookId, minBookId, numChapters, onClick,
+    onHashChanged, onerror, onload, open, parentBookId, parse, position, push,
+    querySelectorAll, responseText, send, setMap, setTimeout, slice, split,
+    status, substring, title, tocName, map, init, changeHash, onHashChanged
 */
 
 /*global console, google, map, window */
@@ -75,7 +76,7 @@ const Scriptures = (function () {
     let getScriptureFailed;
     let htmlAnchor;
     let htmlDiv;
-    let htmlHeader5;
+    //let htmlHeader5;
     let htmlElement;
     let htmlHashLink;
     let htmlLink;
@@ -353,18 +354,8 @@ const Scriptures = (function () {
         let book = books[bookId];
         let volume;
 
-        if (book !== undefined) {
-            volume = volumeForId(book.parentBookId);
-        }
-
-
-        //
-        //$('#scriptures').hide();
         if (bookId !== undefined) {
-            let book = books[bookId];
-            let volume = volumes[book.parentBookId - 1];
-
-            console.log(book);
+            volume = volumes[book.parentBookId - 1];
 
             if (book.numChapters === 0) {
                 navigateChapter(bookId, 0);
@@ -376,14 +367,14 @@ const Scriptures = (function () {
                 let gridContent = `<div class = ${CLASS_VOLUME}><${TAG_HEADER5}>${book.fullName}</${TAG_HEADER5}></div><div class = ${CLASS_BOOKS}>`;
                 let currentChapter;
 
-                for(currentChapter = 1; currentChapter <= book.numChapters; currentChapter++ ) {
+                for (currentChapter = 1; currentChapter <= book.numChapters; currentChapter += 1) {
                     gridContent += htmlLink({
                         classKey: "btn chapter",
                         id: currentChapter,
                         href: `#${volume.id}:${book.id}:${currentChapter}`,
                         content: `${currentChapter}`
                     });
-                };
+                }
 
                 gridContent += `</div>`;
 
@@ -439,20 +430,20 @@ const Scriptures = (function () {
 
             document.getElementById("navButtons").innerHTML = BUTTONS;
 
-            document.getElementById("next_btn").onClick = function() {
-                console.log("next button pressed")
+            document.getElementById("next_btn").onClick = function () {
+                console.log("next button pressed");
                 let next = nextChapter(bookId, chapter);
                 Scriptures.changeHash(next[0], next[1], next[2]);
             };
 
-            document.getElementById("prev_btn").onClick = function() {
-                console.log("prev button pressed")
+            document.getElementById("prev_btn").onClick = function () {
+                console.log("prev button pressed");
                 let prev = previousChapter(bookId, chapter);
                 Scriptures.changeHash(prev[0], prev[1], prev[2]);
             };
 
 
-            let contents = ajax(encodedScriptureUrlParameters(bookId, chapter),
+            ajax(encodedScriptureUrlParameters(bookId, chapter),
                     getScriptureCallback,
                     getScriptureFailed,
                     true);
@@ -499,6 +490,7 @@ const Scriptures = (function () {
 
     nextChapter = function (bookId, chapter) {
         let book = books[bookId];
+        let volume = volumes[book.parentBookId - 1];
 
         if (book !== undefined) {
             if (chapter < book.numChapters) {
@@ -515,9 +507,10 @@ const Scriptures = (function () {
                 }
 
                 return [
-                    nextBook.id,
-                    nextChapterValue,
-                    titleForBookChapter(nextBook, nextChapterValue)
+                    Number[volume.id],
+                    Number[nextBook.id],
+                    Number[nextChapterValue] //,
+                    //titleForBookChapter(nextBook, nextChapterValue)
                 ];
             }
         }
@@ -637,6 +630,9 @@ const Scriptures = (function () {
     return {
         changeHash: changeHash,
         init: init,
+        nextChapter (bookId, chapter) {
+            nextChapter(bookId, chapter);
+        },
         onHashChanged: onHashChanged
     };
 })();
