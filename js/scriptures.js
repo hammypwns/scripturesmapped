@@ -101,15 +101,28 @@ const Scriptures = (function () {
         // NEEDS WORK - check to see if we already have this latitude/longitude in the gmMarkers array
             // if so, merge this place name
 
-        //NEEDS WORK - create the marker
-        let marker = new google.maps.Marker({
-            position: {lat: latitude, lng: longitude},
-            map: map,
-            title: placename,
-            animation: google.maps.Animation.DROP
+        let duplicates = false;
+        let myLatLng = new google.maps.LatLng(latitude, longitude);
+
+        gmMarkers.forEach(function (marker) {
+            if (marker.position.lat() === myLatLng.lat() && marker.position.lng() ===  myLatLng.lng()) {
+                if (!marker.title.includes(placename)) {
+                    marker.title += `, ${placename}`;
+                }
+                duplicates = true;
+            }
         });
 
-        gmMarkers.push(marker);
+        if (!duplicates) {
+            let marker = new google.maps.Marker({
+                position: {lat: latitude, lng: longitude},
+                map: map,
+                title: placename,
+                animation: google.maps.Animation.DROP
+            });
+
+            gmMarkers.push(marker);
+        }
     };
 
     ajax = function (url, successCallback, failureCallback, skipParse) {
@@ -241,6 +254,8 @@ const Scriptures = (function () {
         gmMarkers.forEach(function (marker) {
             marker.setMap(null);
         });
+
+        gmMarkers = [];
     };
 
     encodedScriptureUrlParameters = function (bookId, chapter, verses, isJst) {
@@ -610,10 +625,11 @@ const Scriptures = (function () {
         console.log(gmMarkers);
         console.log(gmMarkers.length);
 
-        map.panTo({lat: 31.777444, lng: 35.234935});
+        if (gmMarkers.length === 0) {
+            map.panTo({lat: 31.777444, lng: 35.234935});
+        }
 
-        if(gmMarkers.length === 1) {
-            map.setZoom(8);
+        if (gmMarkers.length === 1) {
             map.panTo(gmMarkers[0].position);
         }
 
@@ -630,7 +646,9 @@ const Scriptures = (function () {
             // The code above was adapted by code from: https://stackoverflow.com/questions/19304574/center-set-zoom-of-map-to-cover-all-visible-markers
             // Submitted by user: https://stackoverflow.com/users/954940/adam
         }
-    }
+
+        map.setZoom(8);
+    };
 
     setupMarkers = function () {
         if (window.google === undefined) {
