@@ -37,6 +37,7 @@
 
       <script type="text/javascript">
             let map;
+            let showLocation;
 
             function initMap () {
                 map = new google.maps.Map(document.getElementById('map'), {
@@ -63,6 +64,8 @@
                     window.addEventListener("hashchange", Scriptures.onHashChanged);
                     Scriptures.onHashChanged();
                 });
+
+                showLocation = Scriptures.showLocation;
         });
         </script>
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC3PVYjn3aRRevOmd4HhyAgE4t50A-btCY&callback=initMap"

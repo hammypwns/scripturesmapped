@@ -6,14 +6,14 @@ Date: Winter 2019
 */
 
 /*property
-    Animation, DROP, Marker, animation, books, changeHash, classKey,
-    clearTimeout, content, exec, forEach, fullName, getAttribute,
-    getElementById, google, gridName, hash, href, id, init, innerHTML, lat,
-    length, lng, log, map, maps, maxBookId, minBookId, numChapters, onClick,
-    onHashChanged, onerror, onload, open, parentBookId, parse, position, push,
-    querySelectorAll, responseText, send, setMap, setTimeout, slice, split,
-    status, substring, title, tocName, map, init, changeHash, onHashChanged,
-    addEventListener
+    Animation, DROP, LatLng, LatLngBounds, Marker, addEventListener, animation,
+    books, changeHash, classKey, clearTimeout, content, exec, extend, fitBounds,
+    forEach, fullName, getAttribute, getElementById, getPosition, google,
+    gridName, hash, href, id, includes, init, innerHTML, label, lat, length,
+    lng, log, map, maps, maxBookId, minBookId, numChapters, onHashChanged,
+    onerror, onload, open, panTo, parentBookId, parse, position, push,
+    querySelectorAll, responseText, round, send, setMap, setTimeout, setZoom,
+    showLocation, slice, split, status, substring, title, tocName
 */
 
 /*global console, google, map, window */
@@ -90,6 +90,7 @@ const Scriptures = (function () {
     let previousChapter;
     let setupMarkers;
     let setupBounds;
+    let showLocation;
     let titleForBookChapter;
     let volumeForId;
     let volumesGridContent;
@@ -105,7 +106,7 @@ const Scriptures = (function () {
         let myLatLng = new google.maps.LatLng(latitude, longitude);
 
         gmMarkers.forEach(function (marker) {
-            if (marker.position.lat() === myLatLng.lat() && marker.position.lng() ===  myLatLng.lng()) {
+            if (marker.position.lat() === myLatLng.lat() && marker.position.lng() === myLatLng.lng()) {
                 if (!marker.title.includes(placename)) {
                     marker.title += `, ${placename}`;
                 }
@@ -118,6 +119,7 @@ const Scriptures = (function () {
                 position: {lat: latitude, lng: longitude},
                 map: map,
                 title: placename,
+                label: placename,
                 animation: google.maps.Animation.DROP
             });
 
@@ -448,9 +450,9 @@ const Scriptures = (function () {
             document.getElementById("navButtons").innerHTML = BUTTONS;
 
             document.getElementById("next_btn").addEventListener("click", function () {
-                console.log(bookId, chapter);
+                //console.log(bookId, chapter);
                 let next = nextChapter(bookId, chapter);
-                console.log(next);
+                //console.log(next);
                 if (next !== undefined) {
                     changeHash(next[0], next[1], next[2]);
                 } else {
@@ -460,9 +462,9 @@ const Scriptures = (function () {
             });
 
             document.getElementById("prev_btn").addEventListener("click", function () {
-                console.log(bookId, chapter);
+                //console.log(bookId, chapter);
                 let prev = previousChapter(bookId, chapter);
-                console.log(prev);
+                //console.log(prev);
                 if (prev !== undefined) {
                     changeHash(prev[0], prev[1], prev[2]);
                 } else {
@@ -626,10 +628,12 @@ const Scriptures = (function () {
         console.log(gmMarkers.length);
 
         if (gmMarkers.length === 0) {
+            map.setZoom(8);
             map.panTo({lat: 31.777444, lng: 35.234935});
         }
 
         if (gmMarkers.length === 1) {
+            map.setZoom(8);
             map.panTo(gmMarkers[0].position);
         }
 
@@ -640,14 +644,14 @@ const Scriptures = (function () {
             gmMarkers.forEach(function (marker) {
                 bounds.extend(marker.getPosition());
             });
-
+            map.setZoom(8);
             map.fitBounds(bounds);
 
             // The code above was adapted by code from: https://stackoverflow.com/questions/19304574/center-set-zoom-of-map-to-cover-all-visible-markers
             // Submitted by user: https://stackoverflow.com/users/954940/adam
         }
 
-        map.setZoom(8);
+
     };
 
     setupMarkers = function () {
@@ -687,6 +691,26 @@ const Scriptures = (function () {
         setupBounds();
     };
 
+    showLocation = function (geotagId, placename, latitude, longitude, viewLatitude, viewLongitude, viewTilt, viewRoll, viewAltitude, viewHeading) {
+        // DO STUFF HERE
+        gmMarkers.forEach(function (marker) {
+            let myLatLng = new google.maps.LatLng(latitude, longitude);
+
+            if (marker.position.lat() === myLatLng.lat() && marker.position.lng() === myLatLng.lng()) {
+                let zoom = Math.round(Number(viewAltitude) / 450);
+
+                if (zoom < 6) {
+                    zoom = 6;
+                } else if (zoom > 18) {
+                    zoom = 18;
+                }
+
+                map.setZoom(zoom);
+                map.panTo(marker.position);
+            }
+        });
+    };
+
     titleForBookChapter = function (book, chapter) {
         if (chapter > 0) {
             return book.tocName + " " + chapter;
@@ -722,8 +746,9 @@ const Scriptures = (function () {
     * PUBLIC API
     */
     return {
-        changeHash: changeHash,
-        init: init,
-        onHashChanged: onHashChanged
+        changeHash,
+        init,
+        onHashChanged,
+        showLocation
     };
 })();
