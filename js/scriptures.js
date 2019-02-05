@@ -106,7 +106,7 @@ const Scriptures = (function () {
         let myLatLng = new google.maps.LatLng(latitude, longitude);
 
         gmMarkers.forEach(function (marker) {
-            if (marker.position.lat() === myLatLng.lat() && marker.position.lng() === myLatLng.lng()) {
+            if (Math.abs(marker.position.lat() - myLatLng.lat()) < 0.0000001 && Math.abs(marker.position.lng() - myLatLng.lng()) < 0.0000001) {
                 if (!marker.title.includes(placename)) {
                     marker.title += `, ${placename}`;
                 }
@@ -698,6 +698,9 @@ const Scriptures = (function () {
 
             if (marker.position.lat() === myLatLng.lat() && marker.position.lng() === myLatLng.lng()) {
                 let zoom = Math.round(Number(viewAltitude) / 450);
+
+                // the number 450 come from https://scriptures.byu.edu/mapsrip - file: scriptures-compiled.js
+                // it seems view altitude is a huge number, so we just divide by a large number to make the zoom reasonable
 
                 if (zoom < 6) {
                     zoom = 6;
