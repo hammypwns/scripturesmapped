@@ -23,9 +23,10 @@ img {
     top: 0;
     left: 0;
     right: 0;
-    background-color: #3f2000;
+    /* background-color: #3f2000; */
+    background-color: #BC986A;
     color: white;
-    height: 56px;
+    height: 60px;
     display: flex;
     flex-direction: row;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
@@ -35,12 +36,10 @@ img {
 
 #content {
     position: absolute;
-    top: 56px;
+    top: 60px;
     left: 0;
     right: 0;
     bottom: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
     display: flex;
     flex-direction: row;
     align-content: stretch;
@@ -48,27 +47,32 @@ img {
 
 #crumb {
     padding-left: 1.25em;
-    order: -1;
+    order: 1;
 }
 
 #centerhead {
     display: flex;
     flex: 1;
+    order: 2;
     justify-content: center;
     font-weight: normal;
     text-align: center;
     flex-direction: column;
 }
 
-div.title {
+#title {
     display: block;
-    font-size: larger;
+    font-size: 1.5em;
     font-weight: bolder;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
 }
 
-div.subtitle {
+#subtitle {
     display: block;
-    font-size: smaller;
+    font-size: 1em;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
 }
 
 #about {
@@ -77,15 +81,15 @@ div.subtitle {
 }
 
 #scripturesAndNav {
-    min-width: 220px;
-    max-width: 440px;
-    flex: 1 1 30%;
-    height: 100%;
-    min-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    order: 1;
+    flex-grow: 0;
+    flex-basis: 40%;
+    min-width: 350px;
+    max-width: 350px;
+    width: 350px;
     border-right: 1px solid #aaa;
     position: relative;
+    background-color: white;
 }
 
 #scripnav {
@@ -93,11 +97,54 @@ div.subtitle {
     max-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-    width: 100%;
+    min-width: 350px;
+    max-width: 350px;
+    width: 350px;
+}
+
+#navButtons {
+    display: flex;
+    justify-content: center;
+    background-color: #fbeec1;
+}
+
+#prev_btn {
+    text-align: left;
+    width: 50%;
+    order: 1;
+    cursor: pointer;
+    height: 25px;
+
+    /*border-radius: 5px;
+    border-color: #daad86;
+    background-color: #fbeec1;*/
+}
+
+#next_btn {
+    text-align: right;
+    width: 50%;
+    order: 2;
+    cursor: pointer;
+    height: 25px;
+
+    /*border-radius: 5px;
+    border-color: #daad86;
+    background-color: #fbeec1;*/
+}
+
+#prev_btn:hover {
+    background-color: #fbe2c1;
+}
+
+#next_btn:hover {
+    background-color: #fbe2c1;
 }
 
 #map {
-    flex: 1 1 70%;
+    order: 2;
+    flex-grow: 1;
+    flex-basis: 60%;
+    z-index: 10;
 }
 
 .volume {
@@ -112,16 +159,30 @@ div.books {
     justify-content: center;
     padding: 0 .3em;
     margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+
 }
 
 div.books a {
     flex: 0 0 7em;
-    font-weight: normal;
+    font-weight: bold;
     margin: .4em;
     padding-left: .5em;
     padding-right: .5em;
     background-color: #fff;
     color: #222;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+    border-color: #fbeec1;
+    border-style: solid;
+    border-radius: 5px;
+    text-align: center;
+    padding: .3em;
+}
+
+div.books a:hover {
+    text-decoration: underline;
+    background-color: #ebc29d;
 }
 
 div.books a.chapter {
@@ -131,6 +192,7 @@ div.books a.chapter {
 .volume h5 {
     font-size: 1.24rem;
     margin: 0.72rem 0 0.556rem 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .books li {
@@ -147,18 +209,21 @@ div.books a.chapter {
     color: rgb(0, 0, 0);
     font-size: 11pt;
     font-weight: normal;
+    font-family: Arial, Helvetica, sans-serif;
     text-shadow: 2px 0px 2px rgb(255, 255, 255);
     background-color: rgb(255, 255, 255);
     border: solid 5px;
 }
 
-#crumb ul {
+#crumbs ul {
     padding: 0;
+    padding-left: 1em;
     margin: 0;
     line-height: 1.0;
+    list-style: none;
 }
 
-#crumb li {
+#crumbs li {
     padding: 0;
     margin: 0;
     list-style: none;
@@ -175,7 +240,7 @@ div.books a.chapter {
     text-decoration: underline;
 }
 
-#crumb li:not(:first-child)::before {
+#crumbs li:not(:first-child)::before {
     content: ">";
     padding: .3em;
 }
@@ -188,7 +253,6 @@ div.text {
 
 .scripturewrapper {
     position: absolute;
-    min-height: 100%;
     max-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -196,26 +260,31 @@ div.text {
     font-size: 12pt;
     font-weight: normal;
     background-color: white;
-    padding-bottom: 3rem;
+    height: calc(100% - 25px);
+    /* padding-bottom: 3rem; */
 }
 
 div.chapterheading {
-    font-size: 14pt;
+    font-size: 1.25em;
     font-weight: bold;
     padding: .5em;
     text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 div.chapterheading b.big {
-    font-size: 140%;
+    font-size: 1.5em;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 div.navheading {
-    font-size: 13pt;
+    font-size: 14pt;
+    font-weight: bold;
     text-align: center;
     display: flex;
     flex-direction: row;
     justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #scripturesAndNav ul.versesblock {
@@ -269,5 +338,85 @@ span.verse {
 }
 
 li.match {
-    background-color: #ffffcc;
+    background-color: #fbeec1;
+}
+
+#chapters {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+
+#prev_chapter {
+    position: absolute;
+    left: -350px;
+    width: 350px;
+    height: calc(100% - 25px);
+    z-index: 3;
+}
+
+#next_chapter {
+    position: absolute;
+    left: 350px;
+    width: 350px;
+    height: calc(100% - 25px);
+    z-index: 3;
+}
+
+
+@media all and (max-width: 839px) {
+    #content {
+        flex-direction: column;
+    }
+
+    #header {
+        flex-direction: column;
+    }
+
+    #centerhead {
+        order: 1;
+    }
+
+    #crumbs {
+        order: 2;
+        text-align: center;
+        width: auto;
+        padding: 0;
+        padding-bottom: 5px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #scripnav {
+        flex-basis: 60%;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    #scripturesAndNav {
+        flex-basis: 60%;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    #scriptures {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    #prev_chapter {
+        max-width: 100%;
+        width: 100%;
+        z-index: 3;
+    }
+
+    #next_chapter {
+        max-width: 100%;
+        width: 100%;
+        z-index: 3;
+    }
+
+    #map {
+        max-width: 100%;
+        z-index: 10;
+    }
 }

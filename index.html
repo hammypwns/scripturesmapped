@@ -10,11 +10,17 @@
 
         <link rel="manifest" href="site.webmanifest">
         <link rel="apple-touch-icon" href="icon.png">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <!-- Place favicon.ico in the root directory -->
 
         <link rel="stylesheet" href="css/main.css">
 
         <script src="js/scriptures.js" type="text/javascript"></script>
+        <script
+     src='https://code.jquery.com/jquery-3.3.1.min.js'
+     integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8='
+     crossorigin='anonymous'
+   ></script>
     </head>
 
     <body>
@@ -28,9 +34,12 @@
 
       <div id="content">
           <div id="scripturesAndNav">
-              <br />
-              <div id = navButtons></div>
-              <div id = scriptures></div>
+              <div id = "navButtons"></div>
+              <div class = "chapters">
+                <div id = "prev_chapter"></div>
+                <div id = "scriptures"></div>
+                <div id = "next_chapter"></div>
+              </div>
           </div>
           <div id="map"></div>
       </div>
@@ -38,6 +47,7 @@
       <script type="text/javascript">
             let map;
             let showLocation;
+
 
             function initMap () {
                 map = new google.maps.Map(document.getElementById('map'), {
@@ -68,6 +78,39 @@
                 showLocation = Scriptures.showLocation;
         });
         </script>
+<!--
+       <script type="module">
+            import("./js/scriptures.js").then(module => {
+
+                function ready(eventHandler) {
+                    if (document.attachEvent
+                                ? document.readyState === "complete"
+                                : document.readyState !== "loading") {
+                            eventhandler();
+                        } else {
+                            document.addEventListener("DOMContentLoaded", eventHandler);
+                        }
+                }
+
+                window.map = null;
+
+                window.initMap = function () {
+                    map = new google.maps.Map(document.getElementById('map'), {
+                            center: {lat: 31.777444, lng: 35.234935},
+                            zoom: 8
+                    });
+                }
+
+                window.showLocation = module.Scriptures.showLocation;
+
+                ready(module.Scriptures.init(function () {
+                    MapLabelInit();
+                    window.addEventListener("hashchange", Scriptures.onHashChanged);
+                    Scriptufres.onHashChanged();
+                }));
+            });
+        </script>
+    -->
         <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC3PVYjn3aRRevOmd4HhyAgE4t50A-btCY&callback=initMap"
                 async defer></script>
 

@@ -22,17 +22,19 @@ Date: Winter 2019
     browser: true
     long: true */
 
-const Scriptures = (function () {
+    const Scriptures = (function() {
 
     /*
     * CONSTANTS
     */
     const BOTTOM_PADDING = "<br /><br />";
-    const BUTTONS = "<button id=\"prev_btn\">Prev</button><button id=\"next_btn\">Next</button>";
+    const BUTTONS = "<div id='prev_btn'><i class='material-icons'>navigate_before</i></div><div id='next_btn'><i class='material-icons'>navigate_next</i></div>";
     const CLASS_BOOKS = "books";
     const CLASS_VOLUME = "volume";
     const DIV_BREADCRUMBS = "crumbs";
     const DIV_SCRIPTURES = "scriptures";
+    const DIV_PREV_CHAPTER = "prev_chapter";
+    const DIV_NEXT_CHAPTER = "next_chapter";
     const DIV_SCRIPTURES_NAVIGATOR = "scripnav";
     const INDEX_PLACENAME = 2;
     const INDEX_LATITUDE = 3;
@@ -63,6 +65,7 @@ const Scriptures = (function () {
     /*
     * PRIVATE METHOD DECLARATIONS
     */
+
     let addMarker;
     let ajax;
     let bookChapterValid;
@@ -73,6 +76,8 @@ const Scriptures = (function () {
     let changeHash;
     let clearMarkers;
     let encodedScriptureUrlParameters;
+    let getLeftCallback;
+    let getRightCallback;
     let getScriptureCallback;
     let getScriptureFailed;
     let htmlAnchor;
@@ -279,6 +284,14 @@ const Scriptures = (function () {
         }
     };
 
+    getLeftCallback = function (chapterHTML) {
+        document.getElementById("prev_chapter").innerHTML = chapterHTML;
+    };
+
+    getRightCallback = function(chapterHTML) {
+        document.getElementById("next_chapter").innerHTML = chapterHTML;
+    };
+
     getScriptureCallback = function (chapterHtml) {
         document.getElementById(DIV_SCRIPTURES).innerHTML = chapterHtml;
         document.getElementById(DIV_BREADCRUMBS).innerHTML = requestedBreadcrumbs;
@@ -350,6 +363,52 @@ const Scriptures = (function () {
         let booksLoaded = false;
         let volumesLoaded = false;
 
+        fetch(URL_BOOKS)
+            .then(function(response) {
+                if (response.ok) {
+                    booksLoaded = true;
+                    response.json()
+                        .then(booksArray => {
+                            books = booksArray;
+
+                    if (volumesLoaded) {
+                        cacheBooks(callback);
+                    }
+                });
+
+                    return ;
+                }
+
+                throw new Error("Unable to retrieve required data from server.");
+            })
+            .catch(function(error) {
+                console.log("error: ", error.message);
+            });
+
+        fetch(URL_VOLUMES)
+            .then(function(response) {
+                if (response.ok) {
+                    volumesLoaded = true;
+                    response.json()
+                    .then(volumesArray => {
+                        volumes = volumesArray;
+
+                    if (booksLoaded) {
+                        cacheBooks(callback);
+                    }
+                });
+
+                    return;
+                }
+
+                throw new Error("Unable to retrieve required data from server.");
+            })
+            .catch(function(error) {
+                console.log("error: ", error.message);
+            });
+
+
+        /*
         ajax(URL_BOOKS, function (booksObject) {
             books = booksObject;
             booksLoaded = true;
@@ -358,7 +417,9 @@ const Scriptures = (function () {
                 cacheBooks(callback);
             }
         });
+        */
 
+        /*
         ajax(URL_VOLUMES, function (volumesArray) {
             volumes = volumesArray;
             volumesLoaded = true;
@@ -367,6 +428,7 @@ const Scriptures = (function () {
                 cacheBooks(callback);
             }
         });
+        */
     };
 
     navigateBook = function (bookId) {
@@ -433,7 +495,7 @@ const Scriptures = (function () {
         */
     };
 
-    navigateChapter = function (bookId, chapter) {
+    navigateChapter = async function (bookId, chapter) {
         if (bookId !== undefined) {
             let book = books[bookId];
             let volume = volumes[book.parentBookId - 1];
@@ -452,6 +514,25 @@ const Scriptures = (function () {
             document.getElementById("next_btn").addEventListener("click", function () {
                 //console.log(bookId, chapter);
                 let next = nextChapter(bookId, chapter);
+
+                const left = $("#next_chapter").first();
+                ajax(
+                  encodedScriptureUrlParameters(next[1], next[2]),
+                  getRightCallback,
+                  getScriptureFailed,
+                  true
+                );
+                left
+                  .css({ left: "100%", transition: "0s all ease-in", height: "100%", width: "100%" })
+                  .show()
+                  .css({
+                    left: "0px",
+                    transition: "300ms all ease-in"
+                  })
+                  .delay(500)
+                  .fadeOut();
+
+                //document.getElementById(DIV_PREV_CHAPTER).innerHTML = document.getElementById(DIV_SCRIPTURES).innerHTML;
                 //console.log(next);
                 if (next !== undefined) {
                     changeHash(next[0], next[1], next[2]);
@@ -464,6 +545,23 @@ const Scriptures = (function () {
             document.getElementById("prev_btn").addEventListener("click", function () {
                 //console.log(bookId, chapter);
                 let prev = previousChapter(bookId, chapter);
+                const left = $("#prev_chapter").first();
+                ajax(
+                  encodedScriptureUrlParameters(prev[1], prev[2]),
+                  getLeftCallback,
+                  getScriptureFailed,
+                  true
+                );
+                left
+                  .css({ left: "-100%", transition: "0s all ease-in", height: "100%", width: "100%" })
+                  .show()
+                  .css({
+                    left: "0px",
+                    transition: "300ms all ease-in"
+                  })
+                  .delay(500)
+                  .fadeOut();
+                //let prev_chapter = previousChapter(bookId, chapter - 1);
                 //console.log(prev);
                 if (prev !== undefined) {
                     changeHash(prev[0], prev[1], prev[2]);
@@ -473,15 +571,30 @@ const Scriptures = (function () {
                 }
             });
 
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             ajax(encodedScriptureUrlParameters(bookId, chapter),
                     getScriptureCallback,
                     getScriptureFailed,
                     true);
 
+
+          /* fetch(encodedScriptureUrlParameters(bookId, chapter))
+            .then(function(response) {
+                if (response.ok) {
+                    response.then(html => getScriptureCallback(html));
+                    return;
+                }
+                throw new Error("Unable to retrieve chapter information from server.")
+            })
+            .catch(function(error) {
+                console.log("Error: ", error.message);
+            })
+            */
+
             //old dummy code below:
             //document.getElementById("scriptures").innerHTML = "<div>Chapter " + chapter + "</div>";
-        }
+        };
     };
 
     navigateHome = function (volumeId) {
@@ -671,7 +784,7 @@ const Scriptures = (function () {
             clearMarkers();
         }
 
-        document.querySelectorAll("a[onclick^=\"showLocation(\"]").forEach(function (element) {
+        document.querySelectorAll("#scriptures a[onclick^=\"showLocation(\"]").forEach(function (element) {
             let matches = LAT_LON_PARSER.exec(element.getAttribute("onclick"));
 
             if (matches) {
@@ -748,10 +861,18 @@ const Scriptures = (function () {
     /*
     * PUBLIC API
     */
+
+/*
+let Scriptures = {changeHash, init, onHashChanged, showLocation};
+
+export {Scriptures as default };
+*/
+
     return {
         changeHash,
         init,
         onHashChanged,
         showLocation
     };
-})();
+
+    })();
