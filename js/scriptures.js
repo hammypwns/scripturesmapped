@@ -296,7 +296,12 @@ Date: Winter 2019
     };
 
     getScriptureCallback = function (chapterHtml) {
+        $('#scriptures').fadeOut(250, () => {
         document.getElementById(DIV_SCRIPTURES).innerHTML = chapterHtml;
+        });
+
+        $('#scriptures').fadeIn(250);
+
         document.getElementById(DIV_BREADCRUMBS).innerHTML = requestedBreadcrumbs;
         setupMarkers();
     };
@@ -462,10 +467,14 @@ Date: Winter 2019
 
                 gridContent += `</div>`;
 
-                document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
-                    id: DIV_SCRIPTURES_NAVIGATOR,
-                    content: gridContent
+                $('#scriptures').fadeOut(250, () => {
+                    document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
+                        id: DIV_SCRIPTURES_NAVIGATOR,
+                        content: gridContent
+                    });
                 });
+
+                $('#scriptures').fadeIn(250);
 
                 document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volume, book);
 
@@ -637,11 +646,14 @@ Date: Winter 2019
         document.getElementById(DIV_SCRIPTURES).innerHTML = navContents;
 
         */
-
-        document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
-            id: DIV_SCRIPTURES_NAVIGATOR,
-            content: volumesGridContent(volumeId)
+        $('#scriptures').fadeOut(250, () => {
+            document.getElementById(DIV_SCRIPTURES).innerHTML = htmlDiv({
+                id: DIV_SCRIPTURES_NAVIGATOR,
+                content: volumesGridContent(volumeId)
+            });
         });
+
+        $('#scriptures').fadeIn(250);
 
         document.getElementById(DIV_BREADCRUMBS).innerHTML = breadcrumbs(volumeForId(volumeId));
 
