@@ -60,6 +60,7 @@ Date: Winter 2019
     let gmMarkers = [];
     let requestedBreadcrumbs;
     let retryDelay = 500;
+    let transitioning = false;
     let volumes;
 
     /*
@@ -286,10 +287,12 @@ Date: Winter 2019
 
     getLeftCallback = function (chapterHTML) {
         document.getElementById("prev_chapter").innerHTML = chapterHTML;
+        transitioning = false;
     };
 
     getRightCallback = function(chapterHTML) {
         document.getElementById("next_chapter").innerHTML = chapterHTML;
+        transitioning = false;
     };
 
     getScriptureCallback = function (chapterHtml) {
@@ -514,30 +517,36 @@ Date: Winter 2019
             document.getElementById("next_btn").addEventListener("click", function () {
                 //console.log(bookId, chapter);
                 let next = nextChapter(bookId, chapter);
-
                 const left = $("#next_chapter").first();
-                ajax(
-                  encodedScriptureUrlParameters(next[1], next[2]),
-                  getRightCallback,
-                  getScriptureFailed,
-                  true
-                );
-                left
-                  .css({ left: "100%", transition: "0s all ease-in", height: "100%", width: "100%" })
-                  .show()
-                  .css({
-                    left: "0px",
-                    transition: "300ms all ease-in"
-                  })
-                  .delay(500)
-                  .fadeOut();
 
-                //document.getElementById(DIV_PREV_CHAPTER).innerHTML = document.getElementById(DIV_SCRIPTURES).innerHTML;
-                //console.log(next);
-                if (next !== undefined) {
-                    changeHash(next[0], next[1], next[2]);
-                } else {
-                    changeHash(undefined);
+                if (next !== undefined && !transitioning) {
+                    transitioning = true;
+                    ajax(
+                    encodedScriptureUrlParameters(next[1], next[2]),
+                    getRightCallback,
+                    getScriptureFailed,
+                    true
+                    );
+                    left
+                    .css({ left: "100%", transition: "0s all ease-in", height: "100%", width: "100%" })
+                    .show()
+                    .css({
+                        left: "0px",
+                        transition: "300ms all ease-in"
+                    })
+                    .delay(500)
+                    .fadeOut();
+
+                    //document.getElementById(DIV_PREV_CHAPTER).innerHTML = document.getElementById(DIV_SCRIPTURES).innerHTML;
+                    //console.log(next);
+                    if (next !== undefined) {
+                        changeHash(next[0], next[1], next[2]);
+                    } else {
+                        changeHash(undefined);
+                        navigateHome();
+                    }
+                }
+                else if (!transitioning) {
                     navigateHome();
                 }
             });
@@ -546,27 +555,35 @@ Date: Winter 2019
                 //console.log(bookId, chapter);
                 let prev = previousChapter(bookId, chapter);
                 const left = $("#prev_chapter").first();
-                ajax(
-                  encodedScriptureUrlParameters(prev[1], prev[2]),
-                  getLeftCallback,
-                  getScriptureFailed,
-                  true
-                );
-                left
-                  .css({ left: "-100%", transition: "0s all ease-in", height: "100%", width: "100%" })
-                  .show()
-                  .css({
-                    left: "0px",
-                    transition: "300ms all ease-in"
-                  })
-                  .delay(500)
-                  .fadeOut();
-                //let prev_chapter = previousChapter(bookId, chapter - 1);
-                //console.log(prev);
-                if (prev !== undefined) {
-                    changeHash(prev[0], prev[1], prev[2]);
-                } else {
-                    changeHash(undefined);
+
+                if (prev !== undefined && !transitioning) {
+                    transitioning = true;
+                    ajax(
+                        encodedScriptureUrlParameters(prev[1], prev[2]),
+                        getLeftCallback,
+                        getScriptureFailed,
+                        true
+                      );
+                      left
+                        .css({ left: "-100%", transition: "0s all ease-in", height: "100%", width: "100%" })
+                        .show()
+                        .css({
+                          left: "0px",
+                          transition: "300ms all ease-in"
+                        })
+                        .delay(500)
+                        .fadeOut();
+                      //let prev_chapter = previousChapter(bookId, chapter - 1);
+                      //console.log(prev);
+                      if (prev !== undefined) {
+                          changeHash(prev[0], prev[1], prev[2]);
+                      } else {
+                          changeHash(undefined);
+                          navigateHome();
+                      }
+                    }
+
+                 else if (!transitioning) {
                     navigateHome();
                 }
             });
